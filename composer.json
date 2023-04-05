@@ -1,0 +1,10 @@
+{
+  "autoload": {
+    "psr-4": {
+      "MailEvent\\": "src/"
+    }
+  },
+  "require": {
+    "guzzlehttp/guzzle": "^7.5"
+  }
+}
