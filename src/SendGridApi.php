@@ -3,6 +3,7 @@
 namespace MailEvent;
 
 use \GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Request;
 
 class SendGridApi
 {
@@ -15,11 +16,10 @@ class SendGridApi
     public function __construct()
     {
         $this->apiKey = SENDGRID_API_KEY;
-        $this->headers = ['headers' =>
-            [
-                'Authorization' => "Bearer {$this->apiKey}"
-            ]
-        ];
+        $this->headers = [
+                'Authorization' => "Bearer {$this->apiKey}",
+                'Content-Type' => 'application/json'
+            ];
         $this->client = new Client();
     }
 
@@ -28,7 +28,7 @@ class SendGridApi
         $response = $this->client->request(
             'GET',
             self::SENDGRID_BASE_URI . 'marketing/lists',
-            $this->headers
+            ['headers' => $this->headers]
         )->getBody()->getContents();
 
         return json_decode($response, true);
@@ -39,9 +39,50 @@ class SendGridApi
         $response = $this->client->request(
             'GET',
             self::SENDGRID_BASE_URI . 'marketing/contacts',
-            $this->headers
+            ['headers' => $this->headers]
         )->getBody()->getContents();
 
         return json_decode($response, true);
+    }
+
+    public function sendEmail($contact, $subject, $message)
+    {
+        $body = json_encode([
+            'personalizations' => [
+                0 => [
+                    'to' => [
+                        0 => [
+                            'email' => $contact['email'],
+                            'name' => $contact['first_name'] . ' ' . $contact['last_name'],
+                        ],
+                    ],
+                    'subject' => $subject,
+                ],
+            ],
+            'content' => [
+                0 => [
+                    'type' => 'text/plain',
+                    'value' => $message,
+                ],
+            ],
+            'from' => [
+                'email' => 'info@keepershc.org',
+                'name' => 'Keepers of the Holly Chalice',
+            ],
+            'reply_to' => [
+                'email' => 'info@keepershc.org',
+                'name' => 'Keepers of the Holly Chalice',
+            ],
+        ], JSON_THROW_ON_ERROR);
+
+        $request = new Request(
+            'POST',
+            self::SENDGRID_BASE_URI . 'mail/send',
+            $this->headers,
+            $body
+        );
+
+        $response = $this->client->sendAsync($request)->wait();
+
     }
 }
