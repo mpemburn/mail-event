@@ -27,21 +27,26 @@ class MailEvent
 
     public function onPublishPost($id, $post)
     {
-        if ($post->post_type !== 'tribe_event' && $post->post_date !== $post->post_modified) {
+        if ($post->post_type !== 'tribe_event') { // && $post->post_date !== $post->post_modified) {
             return;
         }
 
+        $contacts = (new SendGridApi())->getContacts();
 
+        foreach ($contacts as $contact) {
+            $event = tribe_get_event($post);
+            $message = $this->parseMessage($contact, $event);
+        }
     }
 
-    protected function parseMessage($contact, $post): string
+    protected function parseMessage($contact, $event): string
     {
         $message = get_option('mail_event_message');
         $vars = [
             '[name]' => $contact['first_name'],
-            '[event_title]' => $post->post_title,
-            '[event_date]' => '2023-04-04 15:30',
-            '[event_permalink]' => $post->post_permalink,
+            '[event_title]' => $event->post_title,
+            '[event_date]' => $event->start_date,
+            '[event_permalink]' => get_permalink($event),
         ];
 
         preg_match_all('/\[[\w_]+\]/', $message, $matches);
