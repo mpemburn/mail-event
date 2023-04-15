@@ -16,6 +16,5 @@ namespace MailEvent;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use MailEvent\AdminPage;
-
 AdminPage::boot();
+MailEvent::boot();

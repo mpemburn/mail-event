@@ -45,35 +45,9 @@ class SendGridApi
         return json_decode($response, true);
     }
 
-    public function sendEmail($contact, $subject, $message)
+    public function sendEmail(MailData $mailData)
     {
-        $body = json_encode([
-            'personalizations' => [
-                0 => [
-                    'to' => [
-                        0 => [
-                            'email' => $contact['email'],
-                            'name' => $contact['first_name'] . ' ' . $contact['last_name'],
-                        ],
-                    ],
-                    'subject' => $subject,
-                ],
-            ],
-            'content' => [
-                0 => [
-                    'type' => 'text/plain',
-                    'value' => $message,
-                ],
-            ],
-            'from' => [
-                'email' => 'info@keepershc.org',
-                'name' => 'Keepers of the Holly Chalice',
-            ],
-            'reply_to' => [
-                'email' => 'info@keepershc.org',
-                'name' => 'Keepers of the Holly Chalice',
-            ],
-        ], JSON_THROW_ON_ERROR);
+        $body = $mailData->build();
 
         $request = new Request(
             'POST',

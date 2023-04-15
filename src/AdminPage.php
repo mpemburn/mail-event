@@ -27,21 +27,33 @@ class AdminPage
     protected function addActions(): void
     {
         add_action('admin_menu', [$this, 'addMenuPage']);
-        add_action('wp_ajax_nopriv_save_mail_message', [$this, 'saveMailMessage']);
-        add_action('wp_ajax_save_mail_message', [$this, 'saveMailMessage']);
+        add_action('wp_ajax_nopriv_save_mail_event_settings', [$this, 'saveMailEventSettings']);
+        add_action('wp_ajax_save_mail_event_settings', [$this, 'saveMailEventSettings']);
     }
 
-    public function saveMailMessage(): void
+    public function saveMailEventSettings(): void
     {
-        $message = $_REQUEST['mail_event_message'] ?? null;
+        $templateId = $_REQUEST['template_id'] ?? null;
 
-        if ($message) {
-            update_option('mail_event_message', $message);
+        if ($templateId) {
+            update_option('mail_event_template_id', $templateId);
+        }
+
+        $fromEmail = $_REQUEST['from_email'] ?? null;
+
+        if ($fromEmail) {
+            update_option('mail_event_from_email', $fromEmail);
+        }
+
+        $fromName = $_REQUEST['from_name'] ?? null;
+
+        if ($fromName) {
+            update_option('mail_event_from_name', $fromName);
         }
 
         wp_send_json([
                 'success' => true,
-                'message' => $message
+                'template_id' => $templateId
         ]);
 
         die();
@@ -62,11 +74,12 @@ class AdminPage
 
     public function showListPage(): void
     {
+//        (new MailEvent())->onPublishPost(96, get_post(96));
         $this->getScript();
         $this->getStyle();
         echo '<div class="container">';
 
-        $this->getMailMessage();
+        $this->getMailEventOptions();
         $this->getContactList();
 
         echo '</div>';
@@ -81,8 +94,19 @@ class AdminPage
                 max-width: 90%;
                 margin-top: 2rem;
             }
+            div.settings {
+                width: 20rem;
+            }
             table tr td {
                 font-size: 14px;
+            }
+            input[type=text] {
+                display: table;
+                min-width: 20rem;
+            }
+            #mail_event_update {
+                margin-top: 5px;
+                text-align: right;
             }
         </style>
         <?php
@@ -95,14 +119,16 @@ class AdminPage
         ?>
         <script>
             jQuery(document).ready(function ($) {
-                $('#update_message').on('click', function () {
+                $('#mail_event_update').on('click', function () {
                     $.ajax({
                         type: "POST",
                         dataType: 'json',
                         url: "/wp-admin/admin-ajax.php",
                         data: {
-                            action: 'save_mail_message',
-                            mail_event_message: tinymce.activeEditor.getContent()
+                            action: 'save_mail_event_settings',
+                            template_id: $('input[name="mail_event_template_id"]').val(),
+                            from_email: $('input[name="mail_event_from_email"]').val(),
+                            from_name: $('input[name="mail_event_from_name"]').val()
                         },
                         success: function (data) {
                             console.log(data);
@@ -119,16 +145,21 @@ class AdminPage
         ob_end_flush();
     }
 
-    protected function getMailMessage(): void
+    protected function getMailEventOptions(): void
     {
         ob_start();
         ?>
-        <h1>Message</h1>
-        <?php
-            $content = get_option('mail_event_message');
-            wp_editor($content, 'mail_event_message', ['textarea_rows' => '10']);
-        ?>
-        <button id="update_message" class="button thickbox">Update</button>
+        <h1>Settings</h1>
+            <div class="settings">
+                <label for="mail_event_template_id"><strong>Template ID:</strong></label>
+                <input type="text" name="mail_event_template_id" value="<?php  echo get_option('mail_event_template_id'); ?>">
+                <label for="mail_event_from_email"><strong>From Email:</strong></label>
+                <input type="text" name="mail_event_from_email" value="<?php  echo get_option('mail_event_from_email'); ?>">
+                <label for="mail_event_from_name"><strong>From Name:</strong></label>
+                <input type="text" name="mail_event_from_name" value="<?php  echo get_option('mail_event_from_name'); ?>">
+
+                <button id="mail_event_update" class="button thickbox">Update</button>
+            </div>
         <?php
         ob_end_flush();
     }
