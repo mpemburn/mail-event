@@ -74,7 +74,6 @@ class AdminPage
 
     public function showListPage(): void
     {
-//        (new MailEvent())->onPublishPost(96, get_post(96));
         $this->getScript();
         $this->getStyle();
         echo '<div class="container">';
@@ -97,10 +96,14 @@ class AdminPage
             div.settings {
                 width: 20rem;
             }
-            table tr td {
-                font-size: 14px;
+            table tr {
+                background-color: #fefffe;
             }
-            input[type=text] {
+            table tr td {
+                font-size: 16px;
+                padding: 5px 20px;
+            }
+            input[type=text].settings {
                 display: table;
                 min-width: 20rem;
             }
@@ -152,11 +155,11 @@ class AdminPage
         <h1>Settings</h1>
             <div class="settings">
                 <label for="mail_event_template_id"><strong>Template ID:</strong></label>
-                <input type="text" name="mail_event_template_id" value="<?php  echo get_option('mail_event_template_id'); ?>">
+                <input type="text" class="settings" name="mail_event_template_id" value="<?php  echo get_option('mail_event_template_id'); ?>">
                 <label for="mail_event_from_email"><strong>From Email:</strong></label>
-                <input type="text" name="mail_event_from_email" value="<?php  echo get_option('mail_event_from_email'); ?>">
+                <input type="text" class="settings" name="mail_event_from_email" value="<?php  echo get_option('mail_event_from_email'); ?>">
                 <label for="mail_event_from_name"><strong>From Name:</strong></label>
-                <input type="text" name="mail_event_from_name" value="<?php  echo get_option('mail_event_from_name'); ?>">
+                <input type="text" class="settings" name="mail_event_from_name" value="<?php  echo get_option('mail_event_from_name'); ?>">
 
                 <button id="mail_event_update" class="button thickbox">Update</button>
             </div>
@@ -173,16 +176,24 @@ class AdminPage
         <h1>Event Subscribers</h1>
         <table>
             <thead>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Email</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th></th>
             </thead>
+            <tbody>
+                <td><input type="text" name="first_name"></td>
+                <td><input type="text" name="last_name"></td>
+                <td><input type="text" name="email"></td>
+                <td><button class="button">Add</button></td>
+            </tbody>
             <?php
             foreach ($contacts['result'] as $contact) {
                 echo '<tr>';
-                echo '<td>' . $contact['first_name'] . '</td>';
-                echo '<td>' . $contact['last_name'] . '</td>';
-                echo '<td>' . $contact['email'] . '</td>';
+                echo '<td class="contact">' . $contact['first_name'] . '</td>';
+                echo '<td class="contact">' . $contact['last_name'] . '</td>';
+                echo '<td class="contact">' . $contact['email'] . '</td>';
+                echo '<td><button data-email="' . $contact['email'] . '" class="button">Remove</button></td>';
                 echo '</tr>';
             }
             ?>
