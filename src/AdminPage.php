@@ -12,6 +12,8 @@ class AdminPage
     {
         $this->api = new SendGridApi();
 
+        $this->loadScript();
+
         $this->addActions();
     }
 
@@ -29,6 +31,8 @@ class AdminPage
         add_action('admin_menu', [$this, 'addMenuPage']);
         add_action('wp_ajax_nopriv_save_mail_event_settings', [$this, 'saveMailEventSettings']);
         add_action('wp_ajax_save_mail_event_settings', [$this, 'saveMailEventSettings']);
+        add_action('wp_ajax_nopriv_add_or_remove_email', [$this, 'addOrRemoveEmail']);
+        add_action('wp_ajax_add_or_remove_email', [$this, 'addOrRemoveEmail']);
     }
 
     public function saveMailEventSettings(): void
@@ -59,6 +63,17 @@ class AdminPage
         die();
     }
 
+    public function addOrRemoveEmail(): void
+    {
+        $email = $_REQUEST['email'] ?? null;
+
+        wp_send_json([
+            'success' => true,
+            'email' => $email
+        ]);
+        die();
+    }
+
     public function addMenuPage(): void
     {
         add_menu_page(
@@ -74,7 +89,6 @@ class AdminPage
 
     public function showListPage(): void
     {
-        $this->getScript();
         $this->getStyle();
         echo '<div class="container">';
 
@@ -116,36 +130,12 @@ class AdminPage
         ob_end_flush();
     }
 
-    protected function getScript(): void
+    protected function loadScript(): void
     {
-        ob_start();
-        ?>
-        <script>
-            jQuery(document).ready(function ($) {
-                $('#mail_event_update').on('click', function () {
-                    $.ajax({
-                        type: "POST",
-                        dataType: 'json',
-                        url: "/wp-admin/admin-ajax.php",
-                        data: {
-                            action: 'save_mail_event_settings',
-                            template_id: $('input[name="mail_event_template_id"]').val(),
-                            from_email: $('input[name="mail_event_from_email"]').val(),
-                            from_name: $('input[name="mail_event_from_name"]').val()
-                        },
-                        success: function (data) {
-                            console.log(data);
-                        },
-                        error: function (msg) {
-                            console.log(msg);
-                        }
-                    });
-                })
-            });
-
-        </script>
-        <?php
-        ob_end_flush();
+        $file = plugin_dir_path(__FILE__) . 'js/mail_event.js';
+        $cacheBuster = filemtime($file);
+        wp_register_script('mail_event', plugins_url('/js/mail_event.js', __FILE__), array(), $cacheBuster, true);
+        wp_enqueue_script('mail_event');
     }
 
     protected function getMailEventOptions(): void
@@ -182,10 +172,10 @@ class AdminPage
                 <th></th>
             </thead>
             <tbody>
-                <td><input type="text" name="first_name"></td>
-                <td><input type="text" name="last_name"></td>
-                <td><input type="text" name="email"></td>
-                <td><button class="button">Add</button></td>
+                <td><input type="text" name="new_first_name"></td>
+                <td><input type="text" name="new_last_name"></td>
+                <td><input type="text" name="new_email"></td>
+                <td><button class="button" data-email="">Add</button></td>
             </tbody>
             <?php
             foreach ($contacts['result'] as $contact) {
