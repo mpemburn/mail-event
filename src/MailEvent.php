@@ -21,20 +21,16 @@ class MailEvent
 
         return self::$instance;
     }
+
     public function addActions(): void
     {
-        add_action('save_post', [$this, 'onPublishPost']);
+        add_action('draft_to_publish', [$this, 'onPublishPost'], 10, 1);
+        add_action('pending_to_publish', [$this, 'onPublishPost'], 10, 1);
     }
 
-    public function onPublishPost($postId): void
+    public function onPublishPost($post): void
     {
-        global $post;
-
-        if (
-            $post->post_type !== 'tribe_events'
-            && $post->post_status !== 'publish'
-            && $post->post_date !== $post->post_modified
-        ) {
+        if ($post->post_type !== 'tribe_events') {
             return;
         }
 
