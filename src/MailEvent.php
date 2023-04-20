@@ -30,7 +30,11 @@ class MailEvent
     {
         global $post;
 
-        if ($post->post_type !== 'tribe_events' && $post->post_date !== $post->post_modified) {
+        if (
+            $post->post_type !== 'tribe_events'
+            && $post->post_status !== 'publish'
+            && $post->post_date !== $post->post_modified
+        ) {
             return;
         }
 
