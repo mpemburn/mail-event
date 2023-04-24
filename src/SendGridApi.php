@@ -34,6 +34,30 @@ class SendGridApi
         return json_decode($response, true);
     }
 
+    public function createContact(string $email, string $firstName, string $lastName): ?string
+    {
+        $body = '{
+          "contacts": [
+            {
+              "email": "'. $email . '",
+              "first_name": "'. $firstName . '",
+              "last_name": "'. $lastName . '"
+            }
+          ]
+        }';
+
+        $request = new Request(
+            'PUT',
+            self::SENDGRID_BASE_URI . 'marketing/contacts',
+            $this->headers,
+            $body
+        );
+
+        $response = $this->client->sendAsync($request)->wait();
+
+        return ($response) ? $response->getBody() : null;
+    }
+
     public function getContacts()
     {
         $response = $this->client->request(
@@ -43,6 +67,25 @@ class SendGridApi
         )->getBody()->getContents();
 
         return json_decode($response, true);
+    }
+
+    public function getContactByEmail(string $email): ?string
+    {
+
+        $body = '{
+            "emails": ["' . $email . '"]
+        }';
+
+        $request = new Request(
+            'POST',
+            self::SENDGRID_BASE_URI . 'marketing/contacts/search/emails',
+            $this->headers,
+            $body
+        );
+
+        $response = $this->client->sendAsync($request)->wait();
+
+        return ($response) ? $response->getBody() : null;
     }
 
     public function sendEmail(MailData $mailData)
@@ -56,7 +99,7 @@ class SendGridApi
             $body
         );
 
-        $response = $this->client->sendAsync($request)->wait();
+        return $this->client->sendAsync($request)->wait();
 
     }
 }

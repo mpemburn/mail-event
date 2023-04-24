@@ -65,10 +65,24 @@ class AdminPage
 
     public function addOrRemoveEmail(): void
     {
+        $success = false;
+
+        $action = $_REQUEST['button_action'] ?? null;
         $email = $_REQUEST['email'] ?? null;
 
+        if ($action && $email) {
+            $firsName = $_REQUEST['first_name'];
+            $lastName = $_REQUEST['last_name'];
+            if ($action === 'add') {
+                // Create new contact
+                $idResult = (new SendGridApi())->createContact($email, $firsName, $lastName);
+            } else {
+
+            }
+        }
+
         wp_send_json([
-            'success' => true,
+            'success' => $success,
             'email' => $email
         ]);
         die();

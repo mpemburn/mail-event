@@ -21,11 +21,10 @@ class MailEvent
 
         return self::$instance;
     }
-
     public function addActions(): void
     {
-        add_action('draft_to_publish', [$this, 'onPublishPost'], 10, 1);
-        add_action('pending_to_publish', [$this, 'onPublishPost'], 10, 1);
+        add_action( 'draft_to_publish', [$this, 'onPublishPost'], 10, 1 );
+        add_action( 'pending_to_publish', [$this, 'onPublishPost'], 10, 1 );
     }
 
     public function onPublishPost($post): void
