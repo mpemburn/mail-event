@@ -3,10 +3,25 @@ jQuery(document).ready(function ($) {
     class MailEvent {
 
         constructor() {
+            this.enable;
+            this.emailRegex = '^(([^<>()[\\]\\\\.,;:\\s@"]+(\\.[^<>()[\\]\\\\.,;:\\s@"]+)*)|.(".+"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$';
+            this.emails;
+            this.existingAddresses = [];
+            this.getExistingAddresses();
             this.addListeners();
         }
 
+        getExistingAddresses() {
+            let self = this;
+
+            this.emails = $('td.email');
+            this.emails.each(function () {
+                self.existingAddresses.push($(this).html());
+            });
+        }
+
         addListeners() {
+            let self = this;
             $('#mail_event_update').on('click', function () {
                 $.ajax({
                     type: "POST",
@@ -28,6 +43,29 @@ jQuery(document).ready(function ($) {
                 });
             })
 
+            // Test that new name and email are entered correctly
+            $('input[name^="new_"]').on('keyup', function () {
+                let newEmail = $('input[name="new_email"]').val();
+                self.enable = true;
+                $('input[name^="new_"]').each(function () {
+                    if ($(this).val() === '') {
+                        self.enable = false;
+                    }
+                });
+
+                if (! newEmail.toLowerCase().match(self.emailRegex)) {
+                    self.enable = false;
+                }
+
+                if (self.existingAddresses.includes(newEmail)) {
+                    alert('"' + newEmail + '" is already in this list.');
+                    self.enable = false;
+                }
+
+                $('button.add-button').prop('disabled', ! self.enable);
+            });
+
+            // Add or remove names
             $('button[data-id], button[data-email]').on('click', function () {
                 let email = $(this).data('email');
                 let contactId = $(this).data('id');
@@ -54,7 +92,7 @@ jQuery(document).ready(function ($) {
                     data: data,
                     success: function (data) {
                         console.log(data);
-                        //location.reload();
+                        location.reload();
                     },
                     error: function (msg) {
                         console.log(msg);

@@ -142,10 +142,18 @@ class AdminPage
                 padding: 5px 20px;
             }
 
+            input[type=text].new-email {
+                width: 20rem;
+            }
+
             input[type=text].settings,
             select.settings {
                 display: table;
                 min-width: 20rem;
+            }
+
+            button.add-button {
+                width: 72px;
             }
 
             #mail_event_update {
@@ -209,18 +217,12 @@ class AdminPage
         ?>
         <h1>Event Subscribers</h1>
         <table>
-            <thead>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Email</th>
-            <th></th>
-            </thead>
             <tbody>
-            <td><input type="text" name="new_first_name"></td>
-            <td><input type="text" name="new_last_name"></td>
-            <td><input type="text" name="new_email"></td>
+            <td><input type="text" name="new_first_name" placeholder="First Name"></td>
+            <td><input type="text" name="new_last_name" placeholder="Last Name"></td>
+            <td><input type="text" name="new_email" class="new-email" placeholder="Enter a valid email address"></td>
             <td>
-                <button class="button" data-email="">Add</button>
+                <button class="button add-button" disabled>Add</button>
             </td>
             </tbody>
             <?php
@@ -228,7 +230,7 @@ class AdminPage
                 echo '<tr>';
                 echo '<td class="contact">' . $contact['first_name'] . '</td>';
                 echo '<td class="contact">' . $contact['last_name'] . '</td>';
-                echo '<td class="contact">' . $contact['email'] . '</td>';
+                echo '<td class="contact email">' . $contact['email'] . '</td>';
                 echo '<td><button data-id="' . $contact['id'] . '" class="button">Remove</button></td>';
                 echo '</tr>';
             }
