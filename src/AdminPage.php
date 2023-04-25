@@ -55,9 +55,11 @@ class AdminPage
             update_option('mail_event_from_name', $fromName);
         }
 
+        update_option('mail_event_list_id',  $_REQUEST['list_id']);
+
         wp_send_json([
-                'success' => true,
-                'template_id' => $templateId
+            'success' => true,
+            'template_id' => $templateId
         ]);
 
         die();
@@ -69,15 +71,16 @@ class AdminPage
 
         $action = $_REQUEST['button_action'] ?? null;
         $email = $_REQUEST['email'] ?? null;
-
+        $contactId = ($_REQUEST['contact_id']) ?? null;
         if ($action && $email) {
             $firsName = $_REQUEST['first_name'];
             $lastName = $_REQUEST['last_name'];
             if ($action === 'add') {
                 // Create new contact
-                $idResult = (new SendGridApi())->createContact($email, $firsName, $lastName);
-            } else {
+                $contactId = $this->api->createContact($email, $firsName, $lastName);
 
+            } else if ($contactId) {
+                $result = $this->api->deleteContactById($contactId);
             }
         }
 
@@ -121,20 +124,25 @@ class AdminPage
                 max-width: 90%;
                 margin-top: 2rem;
             }
+
             div.settings {
                 width: 20rem;
             }
+
             table tr {
                 background-color: #fefffe;
             }
+
             table tr td {
                 font-size: 16px;
                 padding: 5px 20px;
             }
+
             input[type=text].settings {
                 display: table;
                 min-width: 20rem;
             }
+
             #mail_event_update {
                 margin-top: 5px;
                 text-align: right;
@@ -157,16 +165,32 @@ class AdminPage
         ob_start();
         ?>
         <h1>Settings</h1>
-            <div class="settings">
-                <label for="mail_event_template_id"><strong>Template ID:</strong></label>
-                <input type="text" class="settings" name="mail_event_template_id" value="<?php  echo get_option('mail_event_template_id'); ?>">
-                <label for="mail_event_from_email"><strong>From Email:</strong></label>
-                <input type="text" class="settings" name="mail_event_from_email" value="<?php  echo get_option('mail_event_from_email'); ?>">
-                <label for="mail_event_from_name"><strong>From Name:</strong></label>
-                <input type="text" class="settings" name="mail_event_from_name" value="<?php  echo get_option('mail_event_from_name'); ?>">
+        <div class="settings">
+            <label for="mail_event_from_email"><strong>From Email:</strong></label>
+            <input type="text" class="settings" name="mail_event_from_email"
+                   value="<?php echo get_option('mail_event_from_email'); ?>">
+            <label for="mail_event_from_name"><strong>From Name:</strong></label>
+            <input type="text" class="settings" name="mail_event_from_name"
+                   value="<?php echo get_option('mail_event_from_name'); ?>">
+            <label for="mail_event_list_name"><strong>SendGrid List Name:</strong></label><br>
+            <select name="mail_event_list_id">
+                <option value="">Select List</option>
+                <?php
+                $lists = $this->api->getLists();
+                $current = get_option('mail_event_list_id');
+                foreach ($lists as $list) {
+                    $selected = $list['id'] === $current ? 'selected' : '';
+                    echo '<option value="' . $list['id'] . '" ' . $selected . '>' . $list['name'] . '</option>';
+                }
+                ?>
+            </select>
+            <br>
+            <label for="mail_event_template_id"><strong>SendGrid Template ID:</strong></label>
+            <input type="text" class="settings" name="mail_event_template_id"
+                   value="<?php echo get_option('mail_event_template_id'); ?>">
 
-                <button id="mail_event_update" class="button thickbox">Update</button>
-            </div>
+            <button id="mail_event_update" class="button thickbox">Update</button>
+        </div>
         <?php
         ob_end_flush();
     }
@@ -180,16 +204,18 @@ class AdminPage
         <h1>Event Subscribers</h1>
         <table>
             <thead>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Email</th>
-                <th></th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th></th>
             </thead>
             <tbody>
-                <td><input type="text" name="new_first_name"></td>
-                <td><input type="text" name="new_last_name"></td>
-                <td><input type="text" name="new_email"></td>
-                <td><button class="button" data-email="">Add</button></td>
+            <td><input type="text" name="new_first_name"></td>
+            <td><input type="text" name="new_last_name"></td>
+            <td><input type="text" name="new_email"></td>
+            <td>
+                <button class="button" data-email="">Add</button>
+            </td>
             </tbody>
             <?php
             foreach ($contacts['result'] as $contact) {
@@ -197,7 +223,7 @@ class AdminPage
                 echo '<td class="contact">' . $contact['first_name'] . '</td>';
                 echo '<td class="contact">' . $contact['last_name'] . '</td>';
                 echo '<td class="contact">' . $contact['email'] . '</td>';
-                echo '<td><button data-email="' . $contact['email'] . '" class="button">Remove</button></td>';
+                echo '<td><button data-id="' . $contact['id'] . '" class="button">Remove</button></td>';
                 echo '</tr>';
             }
             ?>

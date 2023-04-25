@@ -31,7 +31,7 @@ class SendGridApi
             ['headers' => $this->headers]
         )->getBody()->getContents();
 
-        return json_decode($response, true);
+        return json_decode($response, true)['result'];
     }
 
     public function createContact(string $email, string $firstName, string $lastName): ?string
@@ -71,7 +71,6 @@ class SendGridApi
 
     public function getContactByEmail(string $email): ?string
     {
-
         $body = '{
             "emails": ["' . $email . '"]
         }';
@@ -81,6 +80,19 @@ class SendGridApi
             self::SENDGRID_BASE_URI . 'marketing/contacts/search/emails',
             $this->headers,
             $body
+        );
+
+        $response = $this->client->sendAsync($request)->wait();
+
+        return ($response) ? $response->getBody() : null;
+    }
+
+    public function deleteContactById(string $contactId): ?string
+    {
+        $request = new Request(
+            'DELETE',
+            self::SENDGRID_BASE_URI . '/marketing/contact?ids=' . $contactId,
+            $this->headers
         );
 
         $response = $this->client->sendAsync($request)->wait();

@@ -16,7 +16,8 @@ jQuery(document).ready(function ($) {
                         action: 'save_mail_event_settings',
                         template_id: $('input[name="mail_event_template_id"]').val(),
                         from_email: $('input[name="mail_event_from_email"]').val(),
-                        from_name: $('input[name="mail_event_from_name"]').val()
+                        from_name: $('input[name="mail_event_from_name"]').val(),
+                        list_id: $('select[name="mail_event_list_id"]').val()
                     },
                     success: function (data) {
                         location.reload();
@@ -27,12 +28,17 @@ jQuery(document).ready(function ($) {
                 });
             })
 
-            $('button[data-email]').on('click', function () {
+            $('button[data-id], button[data-email]').on('click', function () {
                 let email = $(this).data('email');
-                let buttonAction = (email) ? 'remove' : 'add';
+                let contactId = $(this).data('id');
+                let buttonAction = (contactId) ? 'remove' : 'add';
                 let data = {
                     action: 'add_or_remove_email',
                     button_action: buttonAction
+                }
+
+                if (buttonAction === 'remove') {
+                    data.contact_id = contactId;
                 }
 
                 if (buttonAction === 'add') {
