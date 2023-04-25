@@ -70,9 +70,8 @@ class AdminPage
         $success = false;
 
         $action = $_REQUEST['button_action'] ?? null;
-        $email = $_REQUEST['email'] ?? null;
-        $contactId = ($_REQUEST['contact_id']) ?? null;
-        if ($action && $email) {
+        if ($action) {
+            $email = $_REQUEST['email'];
             $firsName = $_REQUEST['first_name'];
             $lastName = $_REQUEST['last_name'];
             if ($action === 'add') {
@@ -83,7 +82,10 @@ class AdminPage
                     $this->api->addContactToList($email, get_option('mail_event_list_id'));
                 }
 
-            } elseif ($contactId) {
+            }
+
+            if ($action === 'remove') {
+                $contactId = ($_REQUEST['contact_id']);
                 $this->api->deleteContactById($contactId);
             }
         }

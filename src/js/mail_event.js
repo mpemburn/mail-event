@@ -66,7 +66,7 @@ jQuery(document).ready(function ($) {
             });
 
             // Add or remove names
-            $('button[data-id], button[data-email]').on('click', function () {
+            $('button[data-id], button.add-button').on('click', function () {
                 let email = $(this).data('email');
                 let contactId = $(this).data('id');
                 let buttonAction = (contactId) ? 'remove' : 'add';
