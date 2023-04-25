@@ -34,6 +34,31 @@ class SendGridApi
         return json_decode($response, true)['result'];
     }
 
+    public function addContactToList(string $email, string $listId)
+    {
+        $body = '{
+              "contacts": [
+                {
+                  "email": "' . $email . '"
+                }
+              ],
+              "list_ids": [
+                "' . $listId . '"
+              ]
+            }';
+
+        $request = new Request(
+            'PUT',
+            self::SENDGRID_BASE_URI . 'marketing/contacts',
+            $this->headers,
+            $body
+        );
+
+        $response = $this->client->sendAsync($request)->wait();
+
+        return ($response) ? $response->getBody() : null;
+    }
+
     public function createContact(string $email, string $firstName, string $lastName): ?string
     {
         $body = '{

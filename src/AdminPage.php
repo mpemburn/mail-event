@@ -55,7 +55,7 @@ class AdminPage
             update_option('mail_event_from_name', $fromName);
         }
 
-        update_option('mail_event_list_id',  $_REQUEST['list_id']);
+        update_option('mail_event_list_id', $_REQUEST['list_id']);
 
         wp_send_json([
             'success' => true,
@@ -78,9 +78,13 @@ class AdminPage
             if ($action === 'add') {
                 // Create new contact
                 $contactId = $this->api->createContact($email, $firsName, $lastName);
+                if ($contactId) {
+                    // Added to event subscribers list
+                    $this->api->addContactToList($email, get_option('mail_event_list_id'));
+                }
 
-            } else if ($contactId) {
-                $result = $this->api->deleteContactById($contactId);
+            } elseif ($contactId) {
+                $this->api->deleteContactById($contactId);
             }
         }
 
@@ -138,7 +142,8 @@ class AdminPage
                 padding: 5px 20px;
             }
 
-            input[type=text].settings {
+            input[type=text].settings,
+            select.settings {
                 display: table;
                 min-width: 20rem;
             }
@@ -173,7 +178,8 @@ class AdminPage
             <input type="text" class="settings" name="mail_event_from_name"
                    value="<?php echo get_option('mail_event_from_name'); ?>">
             <label for="mail_event_list_name"><strong>SendGrid List Name:</strong></label><br>
-            <select name="mail_event_list_id">
+
+            <select name="mail_event_list_id" class="settings">
                 <option value="">Select List</option>
                 <?php
                 $lists = $this->api->getLists();
@@ -184,7 +190,7 @@ class AdminPage
                 }
                 ?>
             </select>
-            <br>
+
             <label for="mail_event_template_id"><strong>SendGrid Template ID:</strong></label>
             <input type="text" class="settings" name="mail_event_template_id"
                    value="<?php echo get_option('mail_event_template_id'); ?>">
