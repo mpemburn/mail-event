@@ -116,7 +116,7 @@ class SendGridApi
     {
         $request = new Request(
             'DELETE',
-            self::SENDGRID_BASE_URI . '/marketing/contact?ids=' . $contactId,
+            self::SENDGRID_BASE_URI . 'marketing/contacts?ids=' . $contactId,
             $this->headers
         );
 
