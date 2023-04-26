@@ -239,7 +239,12 @@ class AdminPage
             </tr>
             </tbody>
             <?php
-            foreach ($contacts['result'] as $contact) {
+            $contactList = $contacts['result'];
+            usort($contactList, function($a, $b) {
+                return $a['last_name'] <=> $b['last_name'];
+            });
+
+            foreach ($contactList as $contact) {
                 echo '<tr>';
                 echo '<td class="contact">' . $contact['first_name'] . '</td>';
                 echo '<td class="contact">' . $contact['last_name'] . '</td>';
