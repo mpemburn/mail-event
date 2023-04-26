@@ -7,6 +7,9 @@ jQuery(document).ready(function ($) {
             this.emailRegex = '^(([^<>()[\\]\\\\.,;:\\s@"]+(\\.[^<>()[\\]\\\\.,;:\\s@"]+)*)|.(".+"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$';
             this.emails;
             this.existingAddresses = [];
+            this.errorMessage = $('#error_message')
+            this.newEmail = $('input[name="new_email"]');
+
             this.getExistingAddresses();
             this.addListeners();
         }
@@ -44,23 +47,27 @@ jQuery(document).ready(function ($) {
             })
 
             // Test that new name and email are entered correctly
-            $('input[name^="new_"]').on('keyup', function () {
-                let newEmail = $('input[name="new_email"]').val();
+            $('input[name^="new_"]').on('keyup paste', function () {
                 self.enable = true;
+                self.errorMessage.html('').hide();
+
                 $('input[name^="new_"]').each(function () {
                     if ($(this).val() === '') {
                         self.enable = false;
                     }
                 });
 
-                if (! newEmail.toLowerCase().match(self.emailRegex)) {
-                    self.enable = false;
-                }
+                setTimeout(function(){
+                    let newEmailValue = self.newEmail.val();
 
-                if (self.existingAddresses.includes(newEmail)) {
-                    alert('"' + newEmail + '" is already in this list.');
-                    self.enable = false;
-                }
+                    if (! newEmailValue.toLowerCase().match(self.emailRegex)) {
+                        self.enable = false;
+                    }
+                    if (self.existingAddresses.includes(newEmailValue)) {
+                        self.errorMessage.html('"' + newEmailValue + '" is already in this list.').show();
+                        self.enable = false;
+                    }
+                },100);
 
                 $('button.add-button').prop('disabled', ! self.enable);
             });

@@ -92,7 +92,7 @@ class AdminPage
 
         wp_send_json([
             'success' => $success,
-            'email' => $email
+            'result' => $_REQUEST
         ]);
         die();
     }
@@ -162,6 +162,12 @@ class AdminPage
                 margin-top: 5px;
                 text-align: right;
             }
+
+            #error_message {
+                display: none;
+                font-size: 10pt;
+                color: #c00;
+            }
         </style>
         <?php
         ob_end_flush();
@@ -220,12 +226,17 @@ class AdminPage
         <h1>Event Subscribers</h1>
         <table>
             <tbody>
-            <td><input type="text" name="new_first_name" placeholder="First Name"></td>
-            <td><input type="text" name="new_last_name" placeholder="Last Name"></td>
-            <td><input type="text" name="new_email" class="new-email" placeholder="Enter a valid email address"></td>
-            <td>
-                <button class="button add-button" disabled>Add</button>
-            </td>
+            <tr>
+                <td><input type="text" name="new_first_name" placeholder="First Name"></td>
+                <td><input type="text" name="new_last_name" placeholder="Last Name"></td>
+                <td><input type="text" name="new_email" class="new-email" placeholder="Enter a valid email address"></td>
+                <td>
+                    <button class="button add-button" disabled>Add</button>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" id="error_message"></td>
+            </tr>
             </tbody>
             <?php
             foreach ($contacts['result'] as $contact) {

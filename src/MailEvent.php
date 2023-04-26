@@ -23,8 +23,8 @@ class MailEvent
     }
     public function addActions(): void
     {
-        add_action( 'draft_to_publish', [$this, 'onPublishPost'], 10, 1 );
-        add_action( 'pending_to_publish', [$this, 'onPublishPost'], 10, 1 );
+        add_action('draft_to_publish', [$this, 'onPublishPost'], 10, 1);
+        add_action('pending_to_publish', [$this, 'onPublishPost'], 10, 1);
     }
 
     public function onPublishPost($post): void
@@ -36,9 +36,9 @@ class MailEvent
         $contacts = (new SendGridApi())->getContacts();
 
         foreach ($contacts['result'] as $contact) {
-            if ($contact['email'] !== 'mpemburn@gmail.com') {
-                continue;
-            }
+//            if ($contact['email'] !== 'mpemburn@gmail.com') {
+//                continue;
+//            }
             $event = tribe_get_event($post);
             $this->sendMail($contact, $event);
         }
