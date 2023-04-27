@@ -6,9 +6,12 @@ jQuery(document).ready(function ($) {
             this.enable;
             this.emailRegex = '^(([^<>()[\\]\\\\.,;:\\s@"]+(\\.[^<>()[\\]\\\\.,;:\\s@"]+)*)|.(".+"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$';
             this.emails;
+            this.addButton = $('button.add-button');
             this.existingAddresses = [];
             this.errorMessage = $('#error_message')
             this.newEmail = $('input[name="new_email"]');
+            this.pendingEvents = $('#pending_events');
+            this.pendingPanel = $('.pending');
 
             this.getExistingAddresses();
             this.addListeners();
@@ -21,6 +24,15 @@ jQuery(document).ready(function ($) {
             this.emails.each(function () {
                 self.existingAddresses.push($(this).html());
             });
+        }
+
+        showPendingPanel(action, email) {
+            this.pendingEvents.append('<div class="pending" data-email="' + email + '"></div>');
+            let panel = $('.pending[data-email="' + email + '"]');
+            let verb = action === 'add' ? 'addition' : 'removal';
+
+            panel.html('Pending ' + verb + ' of ' + email);
+            panel.show();
         }
 
         addListeners() {
@@ -69,7 +81,7 @@ jQuery(document).ready(function ($) {
                     }
                 },100);
 
-                $('button.add-button').prop('disabled', ! self.enable);
+                self.addButton.prop('disabled', ! self.enable);
             });
 
             // Add or remove names
@@ -90,7 +102,10 @@ jQuery(document).ready(function ($) {
                     data.first_name = $('input[name="new_first_name"]').val();
                     data.last_name = $('input[name="new_last_name"]').val();
                     data.email = $('input[name="new_email"]').val();
+                    email = data.email;
                 }
+
+                self.showPendingPanel(buttonAction, email);
 
                 $.ajax({
                     type: "POST",
@@ -99,13 +114,21 @@ jQuery(document).ready(function ($) {
                     data: data,
                     success: function (data) {
                         console.log(data);
-                        location.reload();
+                        // location.reload();
                     },
                     error: function (msg) {
                         console.log(msg);
                     }
                 });
 
+                self.addButton.prop('disabled', true);
+                $('input[name^="new_"]').each(function () {
+                    let input = $(this);
+                    input.val('');
+                    if (input.attr('name') === 'new_first_name') {
+                        input.focus();
+                    }
+                });
             })
         }
     }

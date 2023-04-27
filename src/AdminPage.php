@@ -105,7 +105,7 @@ class AdminPage
             'switch_themes',
             'mail-event',
             [$this, 'showListPage'],
-            'dashicons-admin-tools',
+            'dashicons-email',
             10
         );
     }
@@ -116,8 +116,12 @@ class AdminPage
         echo '<div class="container">';
 
         $this->getMailEventOptions();
+
+        $this->handlePendingEvents();
+
         $this->getContactList();
 
+        set_transient('add_pending', 'mickey@disney.com', 86400);
         echo '</div>';
     }
 
@@ -158,6 +162,10 @@ class AdminPage
                 width: 72px;
             }
 
+            button.refresh {
+                margin-top: 5px;
+            }
+
             #mail_event_update {
                 margin-top: 5px;
                 text-align: right;
@@ -168,6 +176,16 @@ class AdminPage
                 font-size: 10pt;
                 color: #c00;
             }
+
+            .pending {
+                padding: 5px;
+                margin-bottom: 5px;
+                width: 20rem;
+                font-size: 10pt;
+                background-color: #f1caca;
+                border: 1pt solid #9f3333;
+            }
+
         </style>
         <?php
         ob_end_flush();
@@ -240,7 +258,7 @@ class AdminPage
             </tbody>
             <?php
             $contactList = $contacts['result'];
-            usort($contactList, function($a, $b) {
+            usort($contactList, function ($a, $b) {
                 return $a['last_name'] <=> $b['last_name'];
             });
 
@@ -249,13 +267,29 @@ class AdminPage
                 echo '<td class="contact">' . $contact['first_name'] . '</td>';
                 echo '<td class="contact">' . $contact['last_name'] . '</td>';
                 echo '<td class="contact email">' . $contact['email'] . '</td>';
-                echo '<td><button data-id="' . $contact['id'] . '" class="button">Remove</button></td>';
+                echo '<td><button data-id="' . $contact['id'] . '" data-email="' . $contact['email'] . '" class="button">Remove</button></td>';
                 echo '</tr>';
             }
             ?>
         </table>
         <?php
         ob_end_flush();
+    }
+
+    protected function handlePendingEvents()
+    {
+        echo '<div id="pending_events">';
+        echo '</div>';
+        echo '<button class="button refresh">Refresh</button>';
+    }
+
+    protected function buildPendingEvents(string $action, string $pendingItem): string
+    {
+        $html = '<div class="pending" data-email="' . $pendingItem . '">';
+        $html .= $action . ' pending: ' . $pendingItem;
+        $html .= '</div>';
+
+        return $html;
     }
 
 }
